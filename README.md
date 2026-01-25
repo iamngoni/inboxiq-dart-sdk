@@ -1,62 +1,175 @@
-# Inboxiq
+# InboxIQ
 
-[![style: very good analysis][very_good_analysis_badge]][very_good_analysis_link]
-[![Powered by Mason](https://img.shields.io/endpoint?url=https%3A%2F%2Ftinyurl.com%2Fmason-badge)](https://github.com/felangel/mason)
-[![License: MIT][license_badge]][license_link]
+A Dart SDK for the [InboxIQ](https://inboxiq.co.zw) email and SMS API.
 
-A Very Good Project created by Very Good CLI.
+> **Disclaimer:** This codebase is not affiliated with InboxIQ.
 
-## Installation 💻
+## Installation
 
-**❗ In order to start using Inboxiq you must have the [Dart SDK][dart_install_link] installed on your machine.**
+Add `inboxiq` to your `pubspec.yaml`:
 
-Install via `dart pub add`:
-
-```sh
-dart pub add inboxiq
+```yaml
+dependencies:
+  inboxiq:
+    git:
+      url: https://github.com/your-username/inboxiq.git
 ```
 
----
+## Usage
 
-## Continuous Integration 🤖
+### Initialize the client
 
-Inboxiq comes with a built-in [GitHub Actions workflow][github_actions_link] powered by [Very Good Workflows][very_good_workflows_link] but you can also add your preferred CI/CD solution.
+```dart
+import 'package:inboxiq/inboxiq.dart';
 
-Out of the box, on each pull request and push, the CI `formats`, `lints`, and `tests` the code. This ensures the code remains consistent and behaves correctly as you add functionality or make changes. The project uses [Very Good Analysis][very_good_analysis_link] for a strict set of analysis options used by our team. Code coverage is enforced using the [Very Good Workflows][very_good_coverage_link].
-
----
-
-## Running Tests 🧪
-
-To run all unit tests:
-
-```sh
-dart pub global activate coverage 1.15.0
-dart test --coverage=coverage
-dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info
+final inboxiq = InboxIQ.initialize(
+  username: 'your-username',
+  password: 'your-password',
+  apiKey: 'your-api-key',
+);
 ```
 
-To view the generated coverage report you can use [lcov](https://github.com/linux-test-project/lcov).
+### Send an email
 
-```sh
-# Generate Coverage Report
-genhtml coverage/lcov.info -o coverage/
+```dart
+final result = await inboxiq.sendEmail(
+  SendEmailRequest(
+    toRecipients: ['user@example.com'],
+    subject: 'Welcome to InboxIQ!',
+    body: '<h1>Hello!</h1><p>Welcome to our platform.</p>',
+    from: 'noreply@yourdomain.com',
+    applicationId: 123,
+    personalName: 'John Doe',
+  ),
+);
 
-# Open Coverage Report
-open coverage/index.html
+switch (result) {
+  case Success():
+    print('Email queued successfully');
+  case Error(:final error):
+    print('Failed: ${error.message}');
+}
 ```
 
-[dart_install_link]: https://dart.dev/get-dart
-[github_actions_link]: https://docs.github.com/en/actions/learn-github-actions
-[license_badge]: https://img.shields.io/badge/license-MIT-blue.svg
-[license_link]: https://opensource.org/licenses/MIT
-[logo_black]: https://raw.githubusercontent.com/VGVentures/very_good_brand/main/styles/README/vgv_logo_black.png#gh-light-mode-only
-[logo_white]: https://raw.githubusercontent.com/VGVentures/very_good_brand/main/styles/README/vgv_logo_white.png#gh-dark-mode-only
-[mason_link]: https://github.com/felangel/mason
-[very_good_analysis_badge]: https://img.shields.io/badge/style-very_good_analysis-B22C89.svg
-[very_good_analysis_link]: https://pub.dev/packages/very_good_analysis
-[very_good_coverage_link]: https://github.com/marketplace/actions/very-good-coverage
-[very_good_ventures_link]: https://verygood.ventures
-[very_good_ventures_link_light]: https://verygood.ventures#gh-light-mode-only
-[very_good_ventures_link_dark]: https://verygood.ventures#gh-dark-mode-only
-[very_good_workflows_link]: https://github.com/VeryGoodOpenSource/very_good_workflows
+### Send an email with attachments
+
+```dart
+final result = await inboxiq.sendEmail(
+  SendEmailRequest(
+    toRecipients: ['user@example.com'],
+    subject: 'Your Invoice',
+    body: '<p>Please find your invoice attached.</p>',
+    from: 'billing@yourdomain.com',
+    applicationId: 123,
+    attachments: [
+      Attachment(
+        name: 'invoice.pdf',
+        fileSourceUrl: 'https://yourdomain.com/files/invoice.pdf',
+      ),
+    ],
+  ),
+);
+```
+
+### Send an SMS
+
+```dart
+final result = await inboxiq.sendSms(
+  SendSmsRequest(
+    phoneNumber: '+263771234567',
+    message: 'Your verification code is 123456',
+    applicationId: 123,
+  ),
+);
+
+switch (result) {
+  case Success():
+    print('SMS sent successfully');
+  case Error(:final error):
+    print('Failed: ${error.message}');
+}
+```
+
+## API Reference
+
+### InboxIQ
+
+| Method | Description |
+|--------|-------------|
+| `sendEmail(SendEmailRequest)` | Send an email to one or more recipients |
+| `sendSms(SendSmsRequest)` | Send an SMS to a phone number |
+
+### SendEmailRequest
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `toRecipients` | `List<String>` | Yes | Array of recipient email addresses |
+| `subject` | `String` | Yes | Email subject line |
+| `body` | `String` | Yes | Email body (HTML or plain text) |
+| `from` | `String` | Yes | Sender email (must be verified) |
+| `applicationId` | `int` | Yes | Your application ID from dashboard |
+| `plainText` | `bool` | No | Send as plain text (default: false) |
+| `personalName` | `String` | No | Sender's display name |
+| `attachments` | `List<Attachment>` | No | Email attachments |
+
+### SendSmsRequest
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `phoneNumber` | `String` | Yes | Recipient phone number |
+| `message` | `String` | Yes | SMS message content |
+| `applicationId` | `int` | Yes | Your application ID from dashboard |
+
+### Attachment
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | `String` | Attachment file name |
+| `fileSourceUrl` | `String` | URL where the file is hosted |
+
+## Error Handling
+
+The SDK uses a `Result` type for error handling:
+
+```dart
+final result = await inboxiq.sendEmail(request);
+
+// Pattern matching
+switch (result) {
+  case Success():
+    // Handle success
+  case Error(:final error):
+    print('Error ${error.statusCode}: ${error.message}');
+}
+
+// Or use helper methods
+if (result.isSuccess) {
+  // Handle success
+}
+
+if (result.isError) {
+  final error = result.errorOrNull;
+  print('Error: ${error?.message}');
+}
+
+// Or use when
+result.when(
+  success: (_) => print('Success!'),
+  error: (e) => print('Error: ${e.message}'),
+);
+```
+
+### Error Codes
+
+| Code | Description |
+|------|-------------|
+| 400 | Bad Request - Missing or invalid parameters |
+| 401 | Unauthorized - Invalid credentials |
+| 403 | Forbidden - Insufficient permissions or credits |
+| 404 | Not Found - Resource or endpoint not found |
+| 429 | Too Many Requests - Rate limit exceeded |
+| 500 | Server Error |
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.

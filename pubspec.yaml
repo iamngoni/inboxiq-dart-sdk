@@ -1,10 +1,14 @@
 name: inboxiq
-description: A Very Good Project created by Very Good CLI.
+description: A Dart SDK for InboxIQ email and SMS API.
 version: 0.1.0+1
 publish_to: none
 
 environment:
   sdk: ^3.9.0
+
+dependencies:
+  dio: ^5.8.0+1
+  meta: ^1.16.0
 
 dev_dependencies:
   mocktail: ^1.0.4
