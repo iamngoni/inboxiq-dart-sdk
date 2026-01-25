@@ -15,3 +15,4 @@ export 'inboxiq_exception.dart';
 export 'result.dart';
 export 'send_email_request.dart';
 export 'send_sms_request.dart';
+export 'webhook_event.dart';

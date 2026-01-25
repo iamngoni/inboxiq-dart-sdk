@@ -15,3 +15,4 @@ library;
 
 export 'src/inboxiq.dart';
 export 'src/models/models.dart';
+export 'src/webhooks/webhooks.dart';

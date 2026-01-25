@@ -170,6 +170,84 @@ result.when(
 | 429 | Too Many Requests - Rate limit exceeded |
 | 500 | Server Error |
 
+## Webhooks
+
+Handle incoming webhook events from InboxIQ on your Dart server.
+
+> **Note:** Webhooks are currently under development by InboxIQ. This SDK is ready for when they launch.
+
+### Setup
+
+```dart
+import 'package:inboxiq/inboxiq.dart';
+
+final handler = WebhookHandler(secret: 'your-webhook-secret');
+```
+
+### Verify and Parse Webhooks
+
+```dart
+// In your server route handler (e.g., Shelf, Dart Frog):
+Future<Response> handleWebhook(Request request) async {
+  final signature = request.headers[WebhookHandler.signatureHeader];
+  final body = await request.readAsString();
+
+  // Verify signature
+  if (!handler.verifySignature(body, signature)) {
+    return Response(401, body: 'Invalid signature');
+  }
+
+  // Parse event
+  final event = handler.parseEvent(body);
+  
+  switch (event.event) {
+    case WebhookEventType.emailDelivered:
+      print('Email delivered to ${event.data.recipient}');
+    case WebhookEventType.emailBounced:
+      print('Email bounced: ${event.data.bounceType}');
+    case WebhookEventType.emailOpened:
+      print('Email opened at ${event.data.openedAt}');
+    case WebhookEventType.emailClicked:
+      print('Link clicked: ${event.data.clickedUrl}');
+    case WebhookEventType.smsDelivered:
+      print('SMS delivered to ${event.data.phoneNumber}');
+    case WebhookEventType.smsFailed:
+      print('SMS failed: ${event.data.errorMessage}');
+    case WebhookEventType.unknown:
+      print('Unknown event');
+  }
+
+  return Response.ok('OK');
+}
+```
+
+### Webhook Event Types
+
+| Event | Description |
+|-------|-------------|
+| `email.delivered` | Email successfully delivered |
+| `email.bounced` | Email bounced (hard or soft) |
+| `email.opened` | Recipient opened the email |
+| `email.clicked` | Recipient clicked a link |
+| `sms.delivered` | SMS successfully delivered |
+| `sms.failed` | SMS delivery failed |
+
+### Webhook Payload Structure
+
+```json
+{
+  "event": "email.delivered",
+  "timestamp": "2025-01-23T14:30:00Z",
+  "data": {
+    "messageId": "msg_abc123def456",
+    "recipient": "user@example.com",
+    "subject": "Welcome to InboxIQ!",
+    "deliveredAt": "2025-01-23T14:30:00Z",
+    "status": "delivered"
+  }
+}
+```
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
