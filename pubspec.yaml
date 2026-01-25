@@ -1,6 +1,6 @@
 name: inboxiq
 description: A Dart SDK for InboxIQ email and SMS API.
-version: 0.0.2
+version: 0.0.3
 
 environment:
   sdk: ^3.9.0

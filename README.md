@@ -10,9 +10,7 @@ Add `inboxiq` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  inboxiq:
-    git:
-      url: https://github.com/your-username/inboxiq.git
+  inboxiq: ^0.0.3
 ```
 
 ## Usage
